@@ -1,11 +1,9 @@
 package com.shacky.maps_routes;
 
-import com.shacky.maps_routes.Country;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
-//import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
@@ -16,8 +14,15 @@ public class RoutingService {
     private static final String DATA_URL = "https://raw.githubusercontent.com/mledoze/countries/master/countries.json";
     private Map<String, Country> countryMap;
 
-//    @PostConstruct
-    public void loadCountryData() throws IOException {
+    public RoutingService () {
+        try {
+            loadCountryData();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadCountryData() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         List<Country> countries = objectMapper.readValue(new URL(DATA_URL), new TypeReference<List<Country>>() {});
         countryMap = new HashMap<>();
@@ -66,11 +71,13 @@ public class RoutingService {
                     visited.add(neighbor);
                     List<String> newPath = new ArrayList<>(path);
                     newPath.add(neighbor);
+                    if (neighbor.equals(destination)) {
+                        return newPath;
+                    }
                     queue.add(newPath);
                 }
             }
         }
-
         return null; // No route found
     }
 }
