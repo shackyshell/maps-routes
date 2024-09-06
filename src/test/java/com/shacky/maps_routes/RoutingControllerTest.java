@@ -1,8 +1,5 @@
 package com.shacky.maps_routes;
 
-package com.example.routingservice.controller;
-
-import com.example.routingservice.service.RoutingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

@@ -1,9 +1,9 @@
 package com.shacky.maps_routes;
 
+import com.shacky.maps_routes.Country;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
@@ -12,15 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class RoutingServiceTest {
 
     @InjectMocks
     private RoutingService routingService;
-
-    @Mock
-    private Map<String, Country> countryMap;
 
     @BeforeEach
     void setUp() {
@@ -39,14 +35,19 @@ class RoutingServiceTest {
         ita.setCca3("ITA");
         ita.setBorders(Arrays.asList("AUT"));
 
+        Country usa = new Country();
+        usa.setCca3("USA");
+        usa.setBorders(Arrays.asList());
+
         // Mock the country map
-        countryMap = new HashMap<>();
+        Map<String, Country> countryMap = new HashMap<>();
         countryMap.put("CZE", cze);
         countryMap.put("AUT", aut);
         countryMap.put("ITA", ita);
+        countryMap.put("USA", usa);
 
         // Inject the mock country map into the service
-        routingService.countryMap = countryMap;
+        routingService.setCountryMap(countryMap);
     }
 
     @Test
@@ -55,4 +56,33 @@ class RoutingServiceTest {
 
         // Check if the expected route is returned
         assertNotNull(route);
-        assertEquals(Arrays.asList("CZE",
+        assertEquals(Arrays.asList("CZE", "AUT", "ITA"), route);
+    }
+
+    @Test
+    void testCalculateRoute_noRouteAvailable() {
+        Country usa = new Country();
+        usa.setCca3("USA");
+        usa.setBorders(Arrays.asList());
+
+        List<String> route = routingService.calculateRoute("CZE", "USA");
+
+        assertNull(route, "No land route should be found between CZE and USA");
+    }
+
+    @Test
+    void testCalculateRoute_invalidOrigin() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+                routingService.calculateRoute("XYZ", "ITA"));
+
+        assertEquals("Invalid country code", exception.getMessage());
+    }
+
+    @Test
+    void testCalculateRoute_invalidDestination() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+                routingService.calculateRoute("CZE", "XYZ"));
+
+        assertEquals("Invalid country code", exception.getMessage());
+    }
+}
